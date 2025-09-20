@@ -1,0 +1,161 @@
+@import url('./fonts/font-collection.css');
+@import 'tailwindcss';
+@plugin "@tailwindcss/typography";
+
+:root {
+  --white: #fefefe;
+  --black: #010101;
+}
+
+@plugin "daisyui" {
+  themes:
+    light --default,
+    dark --prefersdark;
+}
+@plugin "daisyui/theme" {
+  name: 'light';
+  default: false;
+  prefersdark: false;
+  color-scheme: 'light';
+  --color-base-100: oklch(98% 0.001 106.423);
+  --color-base-200: oklch(97% 0.001 106.424);
+  --color-base-300: oklch(92% 0.003 48.717);
+  --color-base-content: oklch(21% 0.006 56.043);
+  --color-primary: oklch(59% 0.249 0.584);
+  --color-primary-content: oklch(97% 0.014 343.198);
+  --color-secondary: oklch(0% 0 0);
+  --color-secondary-content: oklch(100% 0 0);
+  --color-accent: oklch(59% 0.145 163.225);
+  --color-accent-content: oklch(97% 0.021 166.113);
+  --color-neutral: oklch(44% 0.011 73.639);
+  --color-neutral-content: oklch(98% 0.001 106.423);
+  --color-info: oklch(74% 0.16 232.661);
+  --color-info-content: oklch(29% 0.066 243.157);
+  --color-success: oklch(76% 0.177 163.223);
+  --color-success-content: oklch(26% 0.051 172.552);
+  --color-warning: oklch(85% 0.199 91.936);
+  --color-warning-content: oklch(28% 0.066 53.813);
+  --color-error: oklch(70% 0.191 22.216);
+  --color-error-content: oklch(25% 0.092 26.042);
+  --radius-selector: 2rem;
+  --radius-field: 1rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1.5px;
+  --depth: 1;
+  --noise: 0;
+}
+@plugin "daisyui/theme" {
+  name: 'dark';
+  default: false;
+  prefersdark: false;
+  color-scheme: 'dark';
+  --color-base-100: oklch(25.33% 0.016 252.42);
+  --color-base-200: oklch(23.26% 0.014 253.1);
+  --color-base-300: oklch(21.15% 0.012 254.09);
+  --color-base-content: oklch(97.807% 0.029 256.847);
+  --color-primary: oklch(58% 0.233 277.117);
+  --color-primary-content: oklch(96% 0.018 272.314);
+  --color-secondary: oklch(65% 0.241 354.308);
+  --color-secondary-content: oklch(94% 0.028 342.258);
+  --color-accent: oklch(77% 0.152 181.912);
+  --color-accent-content: oklch(38% 0.063 188.416);
+  --color-neutral: oklch(14% 0.005 285.823);
+  --color-neutral-content: oklch(92% 0.004 286.32);
+  --color-info: oklch(74% 0.16 232.661);
+  --color-info-content: oklch(29% 0.066 243.157);
+  --color-success: oklch(76% 0.177 163.223);
+  --color-success-content: oklch(37% 0.077 168.94);
+  --color-warning: oklch(82% 0.189 84.429);
+  --color-warning-content: oklch(41% 0.112 45.904);
+  --color-error: oklch(71% 0.194 13.428);
+  --color-error-content: oklch(27% 0.105 12.094);
+  --radius-selector: 0.5rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+@theme {
+  --font-lato: 'Lato', sans-serif;
+  --spacing-fhd: 120rem;
+  --spacing-wqhd: 160rem;
+  --color-white: var(--white);
+  --color-black: var(--black);
+}
+
+/* BASICS */
+*:focus,
+*:focus-visible,
+*:focus-within,
+*:active {
+  outline: none;
+}
+
+html,
+body {
+  @apply relative h-full w-full m-0 p-0;
+  min-height: 100vh;
+  scroll-behavior: smooth;
+  -moz-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* LAYOUT */
+.wrapper {
+  .global-loading {
+    @apply flex h-dvh w-full items-center justify-center;
+  }
+
+  header,
+  main,
+  footer {
+    .inner-box {
+      @apply h-full w-full max-w-7xl mx-auto bg-sky-100;
+      &.reduced {
+        @apply max-w-5xl;
+      }
+    }
+  }
+
+  header {
+    @apply h-20 shadow-2xl bg-amber-50;
+  }
+  main {
+    @apply bg-green-100 min-h-[calc(100dvh-13rem)];
+  }
+  footer {
+    @apply  h-32 bg-base-100;
+  }
+}
+
+/* HELPER */
+.very-tiny-spacer {
+  @apply m-0 h-1 w-full p-0;
+}
+.tiny-spacer {
+  @apply m-0 h-2 w-full p-0;
+}
+.medium-spacer {
+  @apply m-0 h-4 w-full p-0;
+}
+.spacer {
+  @apply m-0 h-8 w-full p-0;
+}
+.big-spacer {
+  @apply m-0 h-12 w-full p-0;
+}
+.massive-spacer {
+  @apply m-0 h-20 w-full p-0;
+}
+.just-a-line {
+  @apply m-0 h-px w-full bg-neutral-400 p-0;
+}

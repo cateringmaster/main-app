@@ -1,0 +1,11 @@
+import AuthAPI from '$helper/auth0-api';
+
+export const GET = async (req) => {
+  const id = req.params.id;
+  try {
+    const response = await AuthAPI.get('users/' + id + '/roles', req);
+    return new Response(JSON.stringify(response));
+  } catch (error) {
+    return new Response(JSON.stringify(error));
+  }
+};
