@@ -41,7 +41,20 @@
     </div>
   {/if}
   <div class="inner-box">
-    <h1>HEADER</h1>
+    <h1>HEADER {isAuth}</h1>
+
+          {#if !isAuth}
+        <button
+          class="btn-outline-header"
+          onclick={() => {
+            login();
+          }}
+          ><div class="button-inner">
+            <span>Anmelden</span>
+          </div></button
+        >
+      {/if}
+
   </div>
 </header>
 
@@ -60,7 +73,7 @@
   }
 
   header {
-    @apply sticky top-0 z-20;
+    @apply sticky top-0 z-20 bg-base-100;
     &.loggedin {
       @apply h-28;
       .inner-box {

@@ -1,7 +1,7 @@
 import { createAuth0Client } from '@auth0/auth0-spa-js';
 import { user, isAuthenticated, popupOpen, userroles } from '$store/sharedStates.svelte';
 import authConfig from '$lib/config/auth-config';
-import AuthAPI from '$helper/auth0-api';
+import AuthAPI from '$services/auth0-api';
 
 async function createClient() {
   return await createAuth0Client({

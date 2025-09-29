@@ -1,18 +1,18 @@
 import axios from 'axios';
 
 const axiosAPI = axios.create({
-  baseURL: 'https://dev-lztna60en7yhpzaq.us.auth0.com/api/v2/'
+  baseURL: 'https://dev-2iydab45rkzxhmf7.us.auth0.com/api/v2/'
 });
 
 async function getToken() {
   try {
-    const response = await fetch('https://dev-lztna60en7yhpzaq.us.auth0.com/oauth/token', {
+    const response = await fetch('https://dev-2iydab45rkzxhmf7.us.auth0.com/oauth/token', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        client_id: 'zXz4XyH3QgMnGRP4x6KKkf20YiHGjcAw',
-        client_secret: 'wJU_opDyjhAB7wDK52dFh_S1J3Li-uX7IjpUg1ccaZ3v94nLRTdjlmZI67ypAbyE',
-        audience: 'https://dev-lztna60en7yhpzaq.us.auth0.com/api/v2/',
+        client_id: 'uP6cPZa7yl7V3HNoiK9xVPIXaRZfUF9I',
+        client_secret: 'Dj4n9ZHwFhIojF6IlT5hnJUvSbqPmgXzaIHY1JQEi5ZhZHtw87GpBXGGjWDFcaJQ',
+        audience: 'https://dev-2iydab45rkzxhmf7.us.auth0.com/api/v2/',
         grant_type: 'client_credentials'
       })
     });
@@ -22,8 +22,6 @@ async function getToken() {
     }
 
     const data = await response.json();
-    // console.log(data);
-
     return data.access_token;
   } catch (error) {
     console.error('Error fetching token:', error);
