@@ -13,7 +13,7 @@
 
 <footer>
   <div class="inner-box">
-    <h1>FOOTER</h1>
+    <h1>FOOTER ...</h1>
   </div>
 </footer>
 
