@@ -12,7 +12,7 @@
 
 <CustomSection type={'fullCenterTeaser'}>
 <div class="inner-content-wrapper prose">
-<h2>Testsektion</h2>
+<h2>ERROR</h2>
 </div>
 </CustomSection>
 

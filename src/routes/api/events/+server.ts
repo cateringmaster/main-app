@@ -39,6 +39,7 @@ export const GET = async () => {
       }
     `;
     const { missions } = (await client.request(query)) as any;
+
     return new Response(JSON.stringify(missions));
   } catch (error) {
     return new Response(JSON.stringify(error));

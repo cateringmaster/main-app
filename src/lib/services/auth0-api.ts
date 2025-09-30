@@ -1,22 +1,18 @@
 import axios from 'axios';
-import { VITE_AUTH0_CLIENT_ID } from '$env/static/private';
-import { VITE_AUTH0_DOMAIN } from '$env/static/private';
-import { VITE_AUTH0_AUDIENCE } from '$env/static/private';
-import { VITE_AUTH0_CLIENT_SECRET } from '$env/static/private';
 
 const axiosAPI = axios.create({
-  baseURL: VITE_AUTH0_DOMAIN + '/api/v2/'
+  baseURL: import.meta.env.VITE_AUTH0_DOMAIN + '/api/v2/'
 });
 
 async function getToken() {
   try {
-    const response = await fetch(VITE_AUTH0_DOMAIN + '/oauth/token', {
+    const response = await fetch(import.meta.env.VITE_AUTH0_DOMAIN + '/oauth/token', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        client_id: VITE_AUTH0_CLIENT_ID,
-        client_secret: VITE_AUTH0_CLIENT_SECRET,
-        audience: VITE_AUTH0_AUDIENCE,
+        client_id: import.meta.env.VITE_AUTH0_CLIENT_ID,
+        client_secret: import.meta.env.VITE_AUTH0_CLIENT_SECRET,
+        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
         grant_type: 'client_credentials'
       })
     });
