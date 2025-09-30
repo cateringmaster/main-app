@@ -5,33 +5,27 @@
   import type CalendarOptions from 'svelte-fullcalendar';
   import deLocale from '@fullcalendar/core/locales/de';
   import daygridPlugin from '@fullcalendar/daygrid';
-  import markdownit from 'markdown-it';
+  import EventDetailsModal from '$lib/components/event-details-modal.svelte';
 
   export let data: any;
 
-  let eventTitle;
-  let eventDetails;
-  let eventUid;
-  let eventStart;
-  let eventSpecialWishes;
-  let eventRemarks;
-  let eventPlace;
-  let eventOfferingCreated;
-  let eventNumberOfPersons;
-  let eventMenuePdf;
-  let eventFlow;
-  let eventEnd;
-  let eventDate;
-  let eventCreatedAt;
-  let eventClient;
-  let eventCateringType;
-  let eventCateringStyle;
-  let eventAdditionalServices;
+  // Variables to pass to the modal
+  let selectedEventTitle = '';
+  let selectedEventDetails = '';
+  let selectedEventUid = '';
+  let selectedEventSpecialWishes = '';
+  let selectedEventRemarks = '';
+  let selectedEventPlace = '';
+  let selectedEventOfferingCreated = false;
+  let selectedEventNumberOfPersons = '';
+  let selectedEventFlow = '';
+  let selectedEventClient = '';
+  let selectedEventCateringType = '';
+  let selectedEventCateringStyle = '';
+  let selectedEventAdditionalServices = '';
 
   let currentEvents: any[] = [];
-  let myModal: HTMLDialogElement;
-
-  const md = markdownit();
+  let myModal: HTMLDialogElement; // Still needed to bind to the <dialog> element in the new component
 
   for (let i = 0; i < data.events.length; i++) {
     const currentEvent = data.events[i];
@@ -66,7 +60,7 @@
       remarks: currentEvent.remarks ?? 'n/a',
       place: currentEvent.place ?? 'n/a',
       offeringCreated: currentEvent.offeringCreated ?? false,
-      numberOfPersons: currentEvent.numberOfPersons + ' Persons',
+      numberOfPersons: currentEvent.numberOfPersons + ' Personen',
       flow: currentEvent.flow ?? 'n/a',
       createdAt: currentEvent.createdAt,
       client: currentEvent.client ?? 'n/a',
@@ -89,9 +83,6 @@
       center: 'title',
       right: 'dayGridMonth,dayGridWeek'
     },
-    timeGrid: {
-      dayMaxEventRows: 2
-    },
     eventClick: function (info: any) {
       const dateFormattingOptions = {
         weekday: 'long',
@@ -100,21 +91,19 @@
         day: 'numeric'
       };
 
-      eventTitle = info.event.title + ' am ' + info.event.start.toLocaleDateString('de-DE', dateFormattingOptions);
-      eventDetails = md.render(info.event.extendedProps.description as string);
-      eventUid = info.event.extendedProps.uid;
-      eventStart = info.event.start.toLocaleDateString('de-DE', dateFormattingOptions);
-      eventSpecialWishes = info.event.extendedProps.specialWishes;
-      eventRemarks = info.event.extendedProps.remarks;
-      eventPlace = info.event.extendedProps.place;
-      eventOfferingCreated = info.event.extendedProps.offeringCreated;
-      eventNumberOfPersons = info.event.extendedProps.numberOfPersons;
-      eventFlow = info.event.extendedProps.flow;
-      eventEnd = info.event.end.toLocaleDateString('de-DE', dateFormattingOptions);
-      eventClient = info.event.extendedProps.client;
-      eventCateringType = info.event.extendedProps.cateringType;
-      eventCateringStyle = info.event.extendedProps.cateringStyle;
-      eventAdditionalServices = info.event.extendedProps.additionalServices;
+      selectedEventTitle = info.event.title + ' am ' + info.event.start.toLocaleDateString('de-DE', dateFormattingOptions);
+      selectedEventDetails = info.event.extendedProps.description as string;
+      selectedEventUid = info.event.extendedProps.uid;
+      selectedEventSpecialWishes = info.event.extendedProps.specialWishes;
+      selectedEventRemarks = info.event.extendedProps.remarks;
+      selectedEventPlace = info.event.extendedProps.place;
+      selectedEventOfferingCreated = info.event.extendedProps.offeringCreated;
+      selectedEventNumberOfPersons = info.event.extendedProps.numberOfPersons;
+      selectedEventFlow = info.event.extendedProps.flow;
+      selectedEventClient = info.event.extendedProps.client;
+      selectedEventCateringType = info.event.extendedProps.cateringType;
+      selectedEventCateringStyle = info.event.extendedProps.cateringStyle;
+      selectedEventAdditionalServices = info.event.extendedProps.additionalServices;
 
       myModal.showModal();
     }
@@ -128,58 +117,31 @@
 
 <div class="inner-box">
   <div class="spacer"></div>
-
-  <FullCalendar {options} />
-
-  <article class="prose p-16">
-    <h1>Welcome to SvelteKit</h1>
-    <p>
-      Lorem ipsum dolor, sit amet consectetur adipisicing elit. Doloribus, quod. Inventore, excepturi quis accusantium consequatur doloremque omnis quos et
-      voluptatem animi, libero maiores aut est? Ipsum optio quisquam unde tenetur!
-    </p>
-  </article>
+  <div class="p-4">
+    <FullCalendar {options} />
+  </div>
+  
+  <div class="spacer"></div>
 </div>
 
-<dialog bind:this={myModal} class="modal">
-  <div class="modal-box w-full max-w-2xl">
-    <form method="dialog">
-      <button
-        class="btn absolute top-3 right-3 btn-circle btn-ghost btn-sm"
-        onclick={() => {
-          myModal.close();
-        }}>✕</button
-      >
-    </form>
-
-    <div class="mt-10 mb-6 flex flex-col prose max-w-none">
-      <h1>{eventTitle}</h1>
-      <p>{@html eventDetails}</p>
-      <p>{eventUid}</p>
-      <p>{eventSpecialWishes}</p>
-      <p>{eventRemarks}</p>
-      <p>{eventPlace}</p>
-      <p>{eventOfferingCreated}</p>
-      <p>{eventNumberOfPersons}</p>
-      <p>{eventFlow}</p>
-      <p>{eventClient}</p>
-      <p>{eventCateringType}</p>
-      <p>{eventCateringStyle}</p>
-      <p>{eventAdditionalServices}</p>
-    </div>
-  </div>
-  <form method="dialog" class="modal-backdrop">
-    <button
-      onclick={() => {
-        myModal.close();
-      }}>close</button
-    >
-  </form>
-</dialog>
+<EventDetailsModal
+  bind:myModal="{myModal}"
+  eventTitle="{selectedEventTitle}"
+  eventDetails="{selectedEventDetails}"
+  eventUid="{selectedEventUid}"
+  eventSpecialWishes="{selectedEventSpecialWishes}"
+  eventRemarks="{selectedEventRemarks}"
+  eventPlace="{selectedEventPlace}"
+  eventOfferingCreated="{selectedEventOfferingCreated}"
+  eventNumberOfPersons="{selectedEventNumberOfPersons}"
+  eventFlow="{selectedEventFlow}"
+  eventClient="{selectedEventClient}"
+  eventCateringType="{selectedEventCateringType}"
+  eventCateringStyle="{selectedEventCateringStyle}"
+  eventAdditionalServices="{selectedEventAdditionalServices}"
+/>
 
 <style lang="postcss">
   @reference '../app.css';
-  .modal .modal-box {
-
-    /* --radius-box: 0; */
-  }
+  /* The modal-box styling is now inside event-details-modal.svelte */
 </style>

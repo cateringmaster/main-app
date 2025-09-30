@@ -28,9 +28,12 @@
 
 <footer>
   <div class="inner-box">
-    <h1>FOOTER ...</h1>
-    <div class="controls-area">
-      <label class="swap ml-4 swap-rotate hover:scale-105">
+    <div class="flex flex-col items-center justify-center p-4 text-sm text-center">
+      <p>&copy; {currentYear} Catering Master. All rights reserved.</p>
+      <!-- Optional: Add more footer text or links here -->
+    </div>
+    <div class="controls-area flex items-center justify-center">
+      <label class="swap swap-rotate hover:scale-105">
         <input type="checkbox" class="theme-controller" bind:checked={darkActive} value="abyss" onchange={updateDataAttribute} />
         <svg class="swap-off h-9 w-9 fill-warning" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path
@@ -50,6 +53,6 @@
 <style lang="postcss">
   @reference '../../app.css';
   footer {
-    @apply h-32 w-full bg-base-100;
+    @apply h-26 w-full bg-base-100;
   }
 </style>

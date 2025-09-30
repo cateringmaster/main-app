@@ -3,6 +3,8 @@
   import auth from '$services/auth-service';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
+
+  import logo from '$lib/assets/logo.png';
   import type { User } from '$interfaces/user.interface';
 
   let mobileNavOpen = $state(false);
@@ -30,7 +32,7 @@
   {#if isAuth}
     <div class="logged-in-header">
       <div class="inner-box flex items-center justify-between">
-        <p>Herzlich Willkommen</p>
+        <p><strong>Herzlich Willkommen</strong> <span class="pl-2 opacity-75">{currentUser.email}</span></p>
         <button
           class="text-link-button white-link"
           onclick={() => {
@@ -40,34 +42,32 @@
       </div>
     </div>
   {/if}
-  <div class="inner-box">
-    <h1>HEADER {isAuth}</h1>
+  <div class="inner-box min-h-18">
+    <div class="flex items-center space-x-2">
+      <a href="/">
+        <img src={logo} alt="Logo" class="h-12 w-auto rounded-full mr-2" />
+      </a>
+      <span class="text-xl font-bold">Catering Master</span>
+    </div>
 
-          {#if !isAuth}
-        <button
-          class="btn-outline-header"
-          onclick={() => {
-            login();
-          }}
-          ><div class="button-inner">
-            <span>Anmelden</span>
-          </div></button
-        >
-      {/if}
-
+    {#if isAuth && currentUserRoles?.includes('creator')}
+      <button class="btn btn-secondary" onclick={() => goto('/create-catering')}>Catering anlegen</button>
+    {/if}
+    {#if !isAuth}
+      <button class="btn btn-secondary" onclick={() => login()}>Anmelden</button>
+    {/if}
   </div>
 </header>
 
 <style lang="postcss">
-
   @reference '../../app.css';
 
   .logged-in-header {
-    @apply bg-black w-full py-1.5;
+    @apply w-full bg-primary py-1.5;
     .inner-box {
       @apply m-auto flex h-full w-full max-w-7xl items-center justify-between px-4;
       p {
-        @apply text-neutral-content text-base;
+        @apply text-base text-neutral-content;
       }
     }
   }
@@ -85,5 +85,4 @@
       @apply m-auto flex h-full w-full max-w-7xl items-center justify-between px-4;
     }
   }
-
 </style>

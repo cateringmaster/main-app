@@ -14,6 +14,10 @@
 		"lint": "prettier --check . && eslint ."
 	},
 	"devDependencies": {
+		"@cartamd/plugin-attachment": "^4.2.0",
+		"@cartamd/plugin-code": "^4.2.0",
+		"@cartamd/plugin-emoji": "^4.3.0",
+		"@cartamd/plugin-slash": "^4.2.0",
 		"@eslint/compat": "^1.2.5",
 		"@eslint/js": "^9.22.0",
 		"@fullcalendar/core": "^6.1.19",
@@ -38,6 +42,7 @@
 		"globals": "^16.0.0",
 		"graphql": "^16.11.0",
 		"graphql-request": "^7.2.0",
+		"markdown-it": "^14.1.0",
 		"postcss": "^8.5.6",
 		"prettier": "^3.4.2",
 		"prettier-plugin-svelte": "^3.3.3",
@@ -54,8 +59,9 @@
 	"dependencies": {
 		"@auth0/auth0-spa-js": "^2.4.1",
 		"@hygraph/management-sdk": "^1.5.2",
+		"carta-md": "^4.11.1",
 		"dotenv": "^17.2.2",
-		"markdown-it": "^14.1.0",
+		"leaflet": "^1.9.4",
 		"vanilla-cookieconsent": "^3.1.0"
 	}
 }
