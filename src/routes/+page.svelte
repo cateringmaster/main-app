@@ -141,7 +141,7 @@
 </div>
 
 <dialog bind:this={myModal} class="modal">
-  <div class="modal-box w-11/12 max-w-2xl">
+  <div class="modal-box w-full max-w-2xl">
     <form method="dialog">
       <button
         class="btn absolute top-3 right-3 btn-circle btn-ghost btn-sm"
@@ -151,21 +151,20 @@
       >
     </form>
 
-    <div class="mt-10 mb-6 flex flex-col items-center text-center">
+    <div class="mt-10 mb-6 flex flex-col prose max-w-none">
       <h1>{eventTitle}</h1>
-      <p class="py-2">{@html eventDetails}</p>
-
-      <p class="py-2">{eventUid}</p>
-      <p class="py-2">{eventSpecialWishes}</p>
-      <p class="py-2">{eventRemarks}</p>
-      <p class="py-2">{eventPlace}</p>
-      <p class="py-2">{eventOfferingCreated}</p>
-      <p class="py-2">{eventNumberOfPersons}</p>
-      <p class="py-2">{eventFlow}</p>
-      <p class="py-2">{eventClient}</p>
-      <p class="py-2">{eventCateringType}</p>
-      <p class="py-2">{eventCateringStyle}</p>
-      <p class="py-2">{eventAdditionalServices}</p>
+      <p>{@html eventDetails}</p>
+      <p>{eventUid}</p>
+      <p>{eventSpecialWishes}</p>
+      <p>{eventRemarks}</p>
+      <p>{eventPlace}</p>
+      <p>{eventOfferingCreated}</p>
+      <p>{eventNumberOfPersons}</p>
+      <p>{eventFlow}</p>
+      <p>{eventClient}</p>
+      <p>{eventCateringType}</p>
+      <p>{eventCateringStyle}</p>
+      <p>{eventAdditionalServices}</p>
     </div>
   </div>
   <form method="dialog" class="modal-backdrop">
@@ -179,4 +178,8 @@
 
 <style lang="postcss">
   @reference '../app.css';
+  .modal .modal-box {
+
+    /* --radius-box: 0; */
+  }
 </style>
