@@ -1,3 +1,4 @@
+
 interface AuthConfig {
   domain: string;
   clientId: string;
@@ -14,7 +15,6 @@ const authConfig: AuthConfig = {
 
 // Validierung hinzufügen
 if (!authConfig.domain || !authConfig.clientId) {
-  console.log("ENV ", import.meta.env)
   console.error('Auth0 Konfiguration fehlt! Bitte Environment Variables setzen.');
 }
 

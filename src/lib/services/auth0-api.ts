@@ -1,18 +1,22 @@
 import axios from 'axios';
+import { VITE_AUTH0_CLIENT_ID } from '$env/static/private';
+import { VITE_AUTH0_DOMAIN } from '$env/static/private';
+import { VITE_AUTH0_AUDIENCE } from '$env/static/private';
+import { VITE_AUTH0_CLIENT_SECRET } from '$env/static/private';
 
 const axiosAPI = axios.create({
-  baseURL: 'https://dev-2iydab45rkzxhmf7.us.auth0.com/api/v2/'
+  baseURL: VITE_AUTH0_DOMAIN + '/api/v2/'
 });
 
 async function getToken() {
   try {
-    const response = await fetch('https://dev-2iydab45rkzxhmf7.us.auth0.com/oauth/token', {
+    const response = await fetch(VITE_AUTH0_DOMAIN + '/oauth/token', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        client_id: 'uP6cPZa7yl7V3HNoiK9xVPIXaRZfUF9I',
-        client_secret: 'Dj4n9ZHwFhIojF6IlT5hnJUvSbqPmgXzaIHY1JQEi5ZhZHtw87GpBXGGjWDFcaJQ',
-        audience: 'https://dev-2iydab45rkzxhmf7.us.auth0.com/api/v2/',
+        client_id: VITE_AUTH0_CLIENT_ID,
+        client_secret: VITE_AUTH0_CLIENT_SECRET,
+        audience: VITE_AUTH0_AUDIENCE,
         grant_type: 'client_credentials'
       })
     });
