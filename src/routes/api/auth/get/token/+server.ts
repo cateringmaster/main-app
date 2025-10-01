@@ -2,6 +2,7 @@ import { PUBLIC_VITE_AUTH0_DOMAIN } from '$env/static/public'
 import { PUBLIC_VITE_AUTH0_CLIENT_ID } from '$env/static/public'
 import { VITE_AUTH0_CLIENT_SECRET } from '$env/static/private'
 import { PUBLIC_VITE_AUTH0_AUDIENCE } from '$env/static/public'
+import type { RequestHandler } from '@sveltejs/kit';
 
 async function getToken() {
   try {
@@ -25,7 +26,7 @@ async function getToken() {
   }
 }
 
-export const GET = async () => {
+export const GET: RequestHandler = async () => {
   try {
     const response = (await getToken()) as any;
     return new Response(JSON.stringify(response.access_token));

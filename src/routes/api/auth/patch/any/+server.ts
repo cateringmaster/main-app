@@ -1,4 +1,5 @@
 import { PUBLIC_VITE_AUTH0_DOMAIN } from '$env/static/public';
+import type { RequestHandler } from '@sveltejs/kit';
 
 const baseURL = PUBLIC_VITE_AUTH0_DOMAIN + '/api/v2/'
 
@@ -19,7 +20,7 @@ async function processRequest(url:string, body:any, token:string) {
     }
 }
 
-export const PATCH = async ({request}, event) => {
+export const PATCH: RequestHandler = async ({request}, event) => {
   const requestObject = await request.json();
 
   console.log("requestObject");

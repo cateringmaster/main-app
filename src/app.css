@@ -129,13 +129,13 @@ body {
   }
 
   header {
-    @apply h-20 shadow-2xl;
+    @apply h-20 shadow-xl;
   }
   main {
-    @apply min-h-[calc(100dvh-13rem)] bg-base-200;
+    @apply min-h-[calc(100dvh-11.25rem)] bg-base-200;
   }
   footer {
-    @apply h-32;
+    @apply h-25 w-full bg-base-100;
   }
 }
 
@@ -159,7 +159,7 @@ a,
   font-size: inherit;
   line-height: inherit;
   height: inherit;
-  
+
   &.inverted-underline {
     @apply no-underline;
     &:hover {
@@ -205,8 +205,13 @@ a,
 
 /* CALENDEAR STYLES */
 .fc {
+  @apply pt-10 sm:pt-0;
   --fc-event-bg-color: var(--color-base-content);
   --fc-event-border-color: var(--color-base-content);
+
+  .fc-toolbar .fc-toolbar-title {
+    @apply absolute right-1/2 translate-x-1/2 top-28 sm:relative sm:top-0 sm:right-0 sm:translate-x-0;
+  }
 
   .fc-view.fc-daygrid table.fc-col-header th.fc-col-header-cell.fc-day {
     @apply bg-base-300;
@@ -282,5 +287,18 @@ a,
     --fc-button-hover-bg-color: var(--color-secondary);
     --fc-button-hover-border-color: var(--color-secondary);
     --fc-button-hover-text-color: var(--color-base-100);
+  }
+}
+
+.markdownCell ul {
+  @apply space-y-1;
+
+  li {
+    @apply flex items-start;
+
+    &::before {
+      @apply mt-2 mr-2 h-1.5 w-1.5 min-w-1.5 rounded-full bg-accent;
+      content: '';
+    }
   }
 }

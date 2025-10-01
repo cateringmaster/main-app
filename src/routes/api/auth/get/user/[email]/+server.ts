@@ -1,4 +1,5 @@
 import { PUBLIC_VITE_AUTH0_DOMAIN } from '$env/static/public';
+import type { RequestHandler } from '@sveltejs/kit';
 
 const baseURL = PUBLIC_VITE_AUTH0_DOMAIN + '/api/v2/'
 
@@ -18,7 +19,7 @@ async function processRequest(email:string, token:string) {
     }
 }
 
-export const GET = async (event) => {
+export const GET: RequestHandler = async (event) => {
   const email = event.params.email;
   const res = await event.fetch('/api/auth/get/token');
   const token = await res.json();

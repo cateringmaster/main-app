@@ -52,7 +52,4 @@
 
 <style lang="postcss">
   @reference '../../app.css';
-  footer {
-    @apply h-26 w-full bg-base-100;
-  }
 </style>

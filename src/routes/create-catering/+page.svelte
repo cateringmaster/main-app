@@ -1,27 +1,37 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { user, isAuthenticated, userroles } from '$store/sharedStates.svelte';
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { Carta, MarkdownEditor } from 'carta-md';
   import { emoji } from '@cartamd/plugin-emoji';
   import { slash } from '@cartamd/plugin-slash';
   import { code } from '@cartamd/plugin-code';
   import 'carta-md/default.css';
-  import 'leaflet/dist/leaflet.css';
+  import { uploadMultipleAssetsWithDelay, publishMultipleAssets } from '$lib/helper/uploadAsset';
 
-  let L: any; // Declare L as a variable that will hold the Leaflet object
-
-  const carta = new Carta({
+  const cartaDescription = new Carta({
     sanitizer: false,
     extensions: [emoji(), slash(), code()]
   });
-  let descriptionValue = $state('');
-  let remarksValue = $state('');
-  let clientValue = $state('');
+  const cartaRemarks = new Carta({
+    sanitizer: false,
+    extensions: [emoji(), slash(), code()]
+  });
+  const cartaClient = new Carta({
+    sanitizer: false,
+    extensions: [emoji(), slash(), code()]
+  });
+  const cartaFlow = new Carta({
+    sanitizer: false,
+    extensions: [emoji(), slash(), code()]
+  });
 
-  // State for form fields
   let title = $state('');
+  let description = $state('');
+  let remarks = $state('');
+  let client = $state('');
   let specialWishes = $state('');
+  let flow = $state('');
   let slug = $derived(
     title
       .toLowerCase()
@@ -30,32 +40,28 @@
       .replace(/-+/g, '-') // Replace multiple hyphens with a single hyphen
       .trim()
   );
-  let remarks = $state('');
   let place = $state('');
   let offeringCreated = $state(false);
   let numberOfPersons = $state(1);
-  let location = $state({
-    latitude: 0,
-    longitude: 0
-  });
-  let description = $state('');
   let dateString = $state('');
   let date = $derived(new Date(dateString));
-  let client = $state('');
-
-  let map: any; // Using any for Leaflet map instance
-  let marker: any; // Using any for Leaflet marker instance
-  const initialLatLng: [number, number] = [52.52, 13.405]; // Default: Berlin
-
   let cateringType = $state(''); // Dropdown
   let cateringStyle = $state(''); // Dropdown
   let additionalServices = $state([]); // Multi-select
   let endTime = $state('');
   let startTime = $state('');
+  let end = $derived(new Date(date.getFullYear(), date.getMonth(), date.getDate(), Number(endTime.slice(0, 2)), Number(endTime.slice(-2))));
+  let start = $derived(new Date(date.getFullYear(), date.getMonth(), date.getDate(), Number(startTime.slice(0, 2)), Number(startTime.slice(-2))));
 
-  let end = $derived(new Date(date.getFullYear(), date.getMonth(), date.getDate(), Number(endTime.slice(0,2)), Number(endTime.slice(-2))));
-  let start = $derived(new Date(date.getFullYear(), date.getMonth(), date.getDate(), Number(startTime.slice(0,2)), Number(startTime.slice(-2))));
-  let uploadedFileNames = $state<string[]>([]);
+  // State for file uploads
+  let selectedFiles = $state<File[]>([]);
+  let uploadedAssetIds = $state<string[]>([]);
+
+  // State for messages and loading
+  let successMessage = $state<string | null>(null);
+  let errorMessage = $state<string | null>(null);
+  let isLoading = $state(false);
+  let uploadProgressMessage = $state<string>('');
 
   // Dummy data for dropdowns and multi-select for demonstration
   const cateringTypes = [
@@ -87,114 +93,155 @@
   let currentUserRoles = $derived(userroles.get());
 
   onMount(async () => {
-    // Dynamically import Leaflet on the client side
-    const Leaflet = await import('leaflet');
-    L = Leaflet.default;
-
-    // Redirect if not authenticated or not a 'creator'
     if (!isAuth || !currentUserRoles?.includes('creator')) {
       goto('/');
     }
   });
 
-  function leafletMap(node: HTMLElement) {
-    if (typeof L === 'undefined') {
-      console.warn('Leaflet is not loaded yet. Map will not initialize.');
-      return {};
-    }
-
-    map = L.map(node).setView(initialLatLng, 10);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    marker = L.marker(initialLatLng, { draggable: true }).addTo(map);
-    marker.on('dragend', (event: any) => {
-      const { lat, lng } = event.target.getLatLng();
-      location.latitude = lat;
-      location.longitude = lng;
-    });
-
-    map.on('click', (event: any) => {
-      location.latitude = event.latlng.lat;
-      location.longitude = event.latlng.lng;
-      marker.setLatLng(event.latlng);
-    });
-
-    // Initial setting of location
-    location.latitude = initialLatLng[0];
-    location.longitude = initialLatLng[1];
-
-    return {
-      destroy() {
-        map.remove();
-      }
-    };
-  }
-
   async function handleSubmit() {
-    // TODO: Implement form submission logic
-    console.log('Form Submitted!', {
-      title,
-      specialWishes,
-      slug,
-      remarks: remarksValue, // Using remarksValue from the MarkdownEditor
-      place,
-      offeringCreated,
-      numberOfPersons,
-      location,
-      description: descriptionValue, // Using descriptionValue from the MarkdownEditor
-      date,
-      client: clientValue, // Using clientValue from the MarkdownEditor
-      cateringType,
-      cateringStyle,
-      additionalServices,
-      end,
-      start
-    });
-    // try {
-    //   const response = await fetch('/api/create-catering', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({
-    //       title,
-    //       specialWishes,
-    //       slug,
-    //       remarks,
-    //       place,
-    //       offeringCreated,
-    //       numberOfPersons,
-    //       location,
-    //       description,
-    //       date,
-    //       createdAt,
-    //       client,
-    //       cateringType,
-    //       cateringStyle,
-    //       additionalServices,
-    //       end,
-    //       start,
-    //     }),
-    //   });
-    //   if (response.ok) {
-    //     alert('Catering event created successfully!');
-    //     goto('/'); // Redirect to homepage or event list
-    //   } else {
-    //     alert('Failed to create catering event.');
-    //   }
-    // } catch (error) {
-    //   console.error('Error submitting form:', error);
-    //   alert('An error occurred.');
-    // }
+    isLoading = true;
+    successMessage = null;
+    errorMessage = null;
+
+    try {
+      // 1. Upload files first
+      if (selectedFiles.length > 0) {
+        uploadProgressMessage = 'Starte Dateiuploads...';
+        const newAssetIds = await uploadMultipleAssetsWithDelay(
+          selectedFiles,
+          2000, // 2-second delay between uploads
+          (message, current, total, assetId) => {
+            uploadProgressMessage = `(${current}/${total}) ${message}`;
+            if (assetId && !uploadedAssetIds.includes(assetId)) {
+              // Ensure unique IDs and trigger reactivity
+              uploadedAssetIds = [...uploadedAssetIds, assetId];
+            }
+          }
+        );
+        if (newAssetIds.includes('error')) {
+          throw new Error('Einige Dateien konnten nicht hochgeladen oder verarbeitet werden.');
+        }
+        uploadedAssetIds = newAssetIds;
+      }
+
+      // 2. Prepare catering data for submission
+      const cateringData = {
+        title,
+        specialWishes,
+        slug,
+        remarks,
+        place,
+        offeringCreated,
+        numberOfPersons,
+        description,
+        date,
+        flow,
+        client,
+        cateringType,
+        cateringStyle,
+        additionalServices,
+        end,
+        start,
+        relatedAssets: uploadedAssetIds.map((id) => ({ id })) // Link uploaded assets
+      };
+
+      // 3. Submit catering data to the local API
+      uploadProgressMessage = 'Sende Catering-Daten...';
+      const response = await fetch('/api/events/post', {
+        method: 'POST',
+        body: JSON.stringify(cateringData)
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.json();
+        throw new Error(errorBody.error || 'Fehler beim Erstellen des Caterings.');
+      }
+
+      const responseBody = await response.json();
+      const cateringId = responseBody.data.id; // Assuming the API returns the created catering's ID
+
+      successMessage = 'Catering erfolgreich erstellt. Bereite Veröffentlichung vor...';
+      uploadProgressMessage = 'Warte vor dem Veröffentlichen...';
+      await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait for 5 seconds
+
+      // 4. Publish assets
+      if (uploadedAssetIds.length > 0) {
+        uploadProgressMessage = 'Veröffentliche hochgeladene Assets...';
+        const publishedIds = await publishMultipleAssets(uploadedAssetIds, (message, current, total) => {
+          uploadProgressMessage = `(${current}/${total}) ${message}`;
+        });
+        if (publishedIds.length !== uploadedAssetIds.length) {
+          console.warn('Nicht alle Assets konnten veröffentlicht werden.');
+        }
+      }
+
+      // 5. Publish the catering event
+      uploadProgressMessage = 'Veröffentliche Catering-Eintrag...';
+      const publishCateringResponse = await fetch(`/api/events/publish/${cateringId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!publishCateringResponse.ok) {
+        const errorBody = await publishCateringResponse.json();
+        throw new Error(errorBody.error || 'Fehler beim Veröffentlichen des Caterings.');
+      }
+
+      successMessage = 'Catering und alle zugehörigen Assets erfolgreich erstellt und veröffentlicht!';
+      selectedFiles = []; // Clear files after successful upload
+      uploadedAssetIds = []; // Clear asset IDs
+      uploadProgressMessage = '';
+      await tick(); // Ensure DOM is updated before navigating
+      goto('/'); // Redirect to homepage or event list
+    } catch (e: any) {
+      errorMessage = e.message || 'Ein unerwarteter Fehler ist aufgetreten.';
+      successMessage = null;
+      console.error('Submission error:', e);
+    } finally {
+      isLoading = false;
+      uploadProgressMessage = '';
+    }
   }
 </script>
 
 <div class="spacer"></div>
 <div class="container mx-auto max-w-2xl p-4">
   <h1 class="mb-6 text-center text-3xl font-bold">Neues Catering anlegen</h1>
+
+  {#if successMessage}
+    <div role="alert" class="mb-4 alert alert-success">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24"
+        ><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg
+      >
+      <span>{successMessage}</span>
+    </div>
+  {/if}
+
+  {#if errorMessage}
+    <div role="alert" class="mb-4 alert alert-error">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24"
+        ><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg
+      >
+      <span>{errorMessage}</span>
+    </div>
+  {/if}
+
+  {#if isLoading && uploadProgressMessage}
+    <div role="alert" class="mb-4 alert alert-info">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-6 w-6 shrink-0 stroke-current"
+        ><path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M13 16V9m2 2V9m-2 7H9m0 0H7m2 0H5m-1 4h14a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"
+        ></path></svg
+      >
+      <span>{uploadProgressMessage}</span>
+    </div>
+  {/if}
+
   <form onsubmit={handleSubmit} class="space-y-4 rounded-lg bg-base-100 p-6 shadow-lg">
     <!-- Title -->
     <div>
@@ -203,8 +250,8 @@
       </label>
       <input type="text" id="title" bind:value={title} class="input-bordered input w-full" required />
       {#if slug != ''}
-        <div class="text-right text-accent text-sm px-2.5">{slug}</div>
-       {/if}
+        <div class="px-2.5 text-right text-sm text-accent">{slug}</div>
+      {/if}
     </div>
 
     <!-- Number of Persons -->
@@ -247,7 +294,6 @@
       <input type="text" id="place" bind:value={place} class="input-bordered input w-full" required />
     </div>
 
-
     <!-- Catering Type (Dropdown) -->
     <div>
       <label for="cateringType" class="label">
@@ -277,9 +323,9 @@
     <!-- Additional Services (Multi-select) -->
     <div>
       <label class="label">
-        <span class="label-text">Zusätzliche Dienstleistungen</span>
+        <span class="label-text">Zusätzliche Services</span>
       </label>
-      <div class="grid grid-cols-2 gap-2">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-1.5">
         {#each allAdditionalServices as service}
           <div class="form-control">
             <label class="label cursor-pointer justify-start">
@@ -294,25 +340,33 @@
     <!-- Description (Markdown Editor) -->
     <div>
       <label for="description" class="label">
-        <span class="label-text">Beschreibung (Markdown)</span>
+        <span class="label-text">Beschreibung</span>
       </label>
-      <MarkdownEditor bind:value={description} mode="tabs" {carta} />
+      <MarkdownEditor bind:value={description} mode="tabs" carta={cartaDescription} />
+    </div>
+
+    <!-- Ablauf (Markdown Editor) -->
+    <div>
+      <label for="description" class="label">
+        <span class="label-text">Ablauf</span>
+      </label>
+      <MarkdownEditor bind:value={flow} mode="tabs" carta={cartaFlow} />
     </div>
 
     <!-- Client (Markdown Editor) -->
     <div>
       <label for="client" class="label">
-        <span class="label-text">Kunde (Markdown)</span>
+        <span class="label-text">Kunde</span>
       </label>
-      <MarkdownEditor bind:value={client} mode="tabs" {carta} />
+      <MarkdownEditor bind:value={client} mode="tabs" carta={cartaClient} />
     </div>
 
     <!-- Remarks (Markdown Editor) -->
     <div>
       <label for="remarks" class="label">
-        <span class="label-text">Bemerkungen (Markdown)</span>
+        <span class="label-text">Bemerkungen</span>
       </label>
-      <MarkdownEditor bind:value={remarks} mode="tabs" {carta} />
+      <MarkdownEditor bind:value={remarks} mode="tabs" carta={cartaRemarks} />
     </div>
 
     <!-- Special Wishes -->
@@ -340,30 +394,34 @@
       <input
         type="file"
         id="fileUpload"
-        class="file-input file-input-bordered w-full"
+        class="file-input-bordered file-input w-full"
         multiple
         onchange={(e) => {
-          const newFiles = Array.from((e.target as HTMLInputElement).files || []).map(file => file.name);
-          uploadedFileNames = [...uploadedFileNames, ...newFiles];
-          // Clear the input value so the same file can be selected again if needed
-          (e.target as HTMLInputElement).value = '';
+          selectedFiles = Array.from((e.target as HTMLInputElement).files || []);
         }}
       />
     </div>
 
-    <!-- Display uploaded file names -->
-    {#if uploadedFileNames.length > 0}
+    <!-- Display selected file names -->
+    {#if selectedFiles.length > 0}
       <div class="mt-2">
-        <span class="label-text">Hochgeladene Dateien:</span>
-        <ul class="list-disc list-inside">
-          {#each uploadedFileNames as fileName, index}
+        <span class="label-text">Ausgewählte Dateien:</span>
+        <ul class="list-inside list-disc">
+          {#each selectedFiles as file, index}
             <li class="flex items-center justify-between text-sm text-gray-700">
-              {fileName}
-              <button type="button" class="btn btn-ghost btn-xs" onclick={() => {
-                uploadedFileNames.splice(index, 1);
-                uploadedFileNames = uploadedFileNames; // Trigger reactivity
-              }}>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+              <button
+                aria-label="remove file"
+                type="button"
+                class="btn btn-ghost btn-xs"
+                onclick={() => {
+                  selectedFiles.splice(index, 1);
+                  selectedFiles = selectedFiles; // Trigger reactivity
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                  ><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg
+                >
               </button>
             </li>
           {/each}
@@ -371,7 +429,14 @@
       </div>
     {/if}
 
-    <button type="submit" class="btn w-full btn-secondary">Catering erstellen</button>
+    <button type="submit" class="btn w-full btn-secondary" disabled={isLoading}>
+      {#if isLoading}
+        <span class="loading loading-spinner"></span>
+        Sende...
+      {:else}
+        Catering erstellen
+      {/if}
+    </button>
   </form>
 </div>
 <div class="spacer"></div>
@@ -387,12 +452,11 @@
     max-height: 400px; /* optional */
     height: auto; /* sorgt für flexiblere Anpassung */
   }
-
   :global(.carta-editor) {
     min-height: 0 !important; /* Default aufheben */
     height: auto !important; /* dynamisch */
     max-height: 285px !important; /* dein Limit */
-    @apply !border-2 !border-base-content/20 !rounded-lg;
+    @apply !rounded-lg !border-2 !border-base-content/20;
   }
   :global(.carta-toolbar) {
     @apply !border-b-2 !border-base-content/20;

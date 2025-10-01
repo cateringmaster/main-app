@@ -1,16 +1,15 @@
 import { client } from '$services/graphql-client';
+import type { RequestHandler } from '@sveltejs/kit';
 import { gql } from 'graphql-request';
 
-export const GET = async (req) => {
+export const GET: RequestHandler = async (req) => {
   const date = req.params.date;
 
   try {
     const query = gql`
       query getMissions($date: Date!) {
         missions(where: { datum: $date }, stage: PUBLISHED, first: 100) {
-          uid
           title
-          startTime
           start
           specialWishes
           slug
@@ -18,17 +17,13 @@ export const GET = async (req) => {
           place
           offeringCreated
           numberOfPersons
-          menue {
+          relatedAssets {
             id
             url
-          }
-          location {
-            latitude
-            longitude
+            fileName
           }
           id
           flow
-          endTime
           end
           description
           date

@@ -9,22 +9,22 @@ export const POST: RequestHandler = async ({ request }) => {
     const mutation = gql`
       mutation CreateMission(
         $title: String!
-        $start: Date
+        $start: DateTime
         $specialWishes: String
         $slug: String
         $remarks: String
         $place: String
         $offeringCreated: Boolean
-        $numberOfPersons: Number
-        $flow: String
-        $end: Date
+        $numberOfPersons: Int
+        $end: DateTime
         $description: String
         $date: Date
+        $flow: String
         $client: String
-        $cateringType: CateringType
-        $cateringStyle: CateringStyle
+        $cateringType: EventType
+        $cateringStyle: DiningStyle
         $additionalServices: [AdditionalServices!]
-        $fileIDs: [AssetWhereUniqueInput!]
+        $relatedAssets: [AssetWhereUniqueInput!]
       ) {
         createMission(
           data: {
@@ -36,64 +36,65 @@ export const POST: RequestHandler = async ({ request }) => {
             place: $place
             offeringCreated: $offeringCreated
             numberOfPersons: $numberOfPersons
-            menue { connect: $fileIDs }
-            flow: $flow
-            end: $tiendtle
+            end: $end
             description: $description
+            flow: $flow
             date: $date
             client: $client
             cateringType: $cateringType
             cateringStyle: $cateringStyle
-            additionalService: $additionalService
+            additionalServices: $additionalServices
+            relatedAssets: { connect: $relatedAssets }
           }
         ) {
+          title
+          start
+          specialWishes
+          slug
+          remarks
+          place
+          offeringCreated
+          numberOfPersons
+          relatedAssets {
             id
-            title
-            start
-            specialWishes
-            slug
-            remarks:
-            place
-            offeringCreated
-            numberOfPersons
-            menue {
-              id
-              name
-            }
-            flow
-            end
-            description
-            date
-            client
-            cateringType
-            cateringStyle
-            additionalService
+            url
+            fileName
+          }
+          id
+          flow
+          end
+          description
+          date
+          createdAt
+          client
+          cateringType
+          cateringStyle
+          additionalServices
         }
       }
     `;
 
     const variables = {
       title: cateringData.title,
-      start: cateringData,
-      specialWishes:cateringData,
-      slug: cateringData,
-      remarks: cateringData,
-      place: cateringData,
-      offeringCreated: cateringData,
-      numberOfPersons: cateringData,
-      flow: cateringData,
-      end: cateringData,
-      description: cateringData,
-      date: cateringData,
-      client: cateringData,
-      cateringType: cateringData,
-      cateringStyle: cateringData,
-      additionalService: cateringData,
-      fileIDs: cateringData.relatedFiles?.length ? cateringData.relatedFiles : null,
+      start: cateringData.start,
+      specialWishes: cateringData.specialWishes,
+      slug: cateringData.slug,
+      remarks: cateringData.remarks,
+      place: cateringData.place,
+      offeringCreated: cateringData.offeringCreated,
+      numberOfPersons: cateringData.numberOfPersons,
+      end: cateringData.end,
+      description: cateringData.description,
+      date: cateringData.date,
+      flow: cateringData.flow,
+      client: cateringData.client,
+      cateringType: cateringData.cateringType,
+      cateringStyle: cateringData.cateringStyle,
+      additionalServices: cateringData.additionalServices,
+      relatedAssets: cateringData.relatedAssets?.length ? cateringData.relatedAssets : null
     };
 
     const response = (await client.request(mutation, variables)) as { createMission: Catering };
-
 
     return new Response(
       JSON.stringify({
@@ -108,7 +109,7 @@ export const POST: RequestHandler = async ({ request }) => {
       }
     );
   } catch (error) {
-    console.error('Error creating project:', error);
+    console.error('Error creating catering:', error);
 
     // Spezifische Fehlerbehandlung für GraphQL-Fehler
     let errorMessage = 'Unknown error occurred';

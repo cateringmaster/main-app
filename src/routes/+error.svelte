@@ -12,7 +12,7 @@
 
 <CustomSection type={'fullCenterTeaser'}>
 <div class="inner-content-wrapper prose">
-<h2>Es sist ein Fehler aufgetreten!</h2>
+<h2>Es ist ein Fehler aufgetreten!</h2>
 </div>
 </CustomSection>
 

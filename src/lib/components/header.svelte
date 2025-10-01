@@ -2,7 +2,7 @@
   import { user, isAuthenticated, userroles } from '$store/sharedStates.svelte';
   import auth from '$services/auth-service';
   import { goto } from '$app/navigation';
-  import { page } from '$app/state';
+  import { page } from '$app/stores';
 
   import logo from '$lib/assets/logo.png';
   import type { User } from '$interfaces/user.interface';
@@ -51,7 +51,11 @@
     </div>
 
     {#if isAuth && currentUserRoles?.includes('creator')}
-      <button class="btn btn-secondary" onclick={() => goto('/create-catering')}>Catering anlegen</button>
+      {#if $page.url.pathname === '/create-catering'}
+        <button class="btn btn-secondary" onclick={() => goto('/')}>Caterings anzeigen</button>
+      {:else}
+        <button class="btn btn-secondary" onclick={() => goto('/create-catering')}>Catering anlegen</button>
+      {/if}
     {/if}
     {#if !isAuth}
       <button class="btn btn-secondary" onclick={() => login()}>Anmelden</button>

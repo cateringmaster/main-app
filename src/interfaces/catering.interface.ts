@@ -6,18 +6,20 @@ export interface Catering {
   place?: string;
   offeringCreated?: boolean;
   numberOfPersons?: number;
-  location?: {
-    latitude?: number;
-    longitude?: number;
-  };
+  id?: string;
+  flow?: string;
   description?: string;
   date?: Date;
-  createdAt?: string;
+  createdAt?: Date;
   client?: string;
   cateringType?: string;
   cateringStyle?: string;
   additionalServices?: string[];
   end?: Date; 
   start?: Date;
-  releatedFiles?: string[];
+  relatedAssets?: {
+    url?: string
+    id?: string
+    fileName?: string
+  }[];
 }
