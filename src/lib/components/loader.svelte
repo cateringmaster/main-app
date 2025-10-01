@@ -8,7 +8,7 @@
   @reference '../../app.css';
 
   .loader {
-    @apply text-sky-400 rounded-full w-3 h-3;
+    @apply text-accent rounded-full w-3 h-3;
     --d: 44px;
     box-shadow:
       calc(1 * var(--d)) calc(0 * var(--d)) 0 0,

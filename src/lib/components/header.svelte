@@ -51,7 +51,7 @@
     </div>
 
     {#if isAuth && currentUserRoles?.includes('creator')}
-      {#if $page.url.pathname === '/create-catering'}
+      {#if $page.url.pathname === '/create-catering' || $page.url.pathname === '/edit-catering'}
         <button class="btn btn-secondary" onclick={() => goto('/')}>Caterings anzeigen</button>
       {:else}
         <button class="btn btn-secondary" onclick={() => goto('/create-catering')}>Catering anlegen</button>

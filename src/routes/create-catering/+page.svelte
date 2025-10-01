@@ -8,6 +8,12 @@
   import { code } from '@cartamd/plugin-code';
   import 'carta-md/default.css';
   import { uploadMultipleAssetsWithDelay, publishMultipleAssets } from '$lib/helper/uploadAsset';
+  import auth from '$services/auth-service';
+
+  async function login() {
+    const auth0Client = await auth.createClient();
+    await auth.loginWithPopup(auth0Client);
+  }
 
   const cartaDescription = new Carta({
     sanitizer: false,
@@ -25,6 +31,10 @@
     sanitizer: false,
     extensions: [emoji(), slash(), code()]
   });
+
+  let isAuth = $derived(isAuthenticated.get());
+  let currentUserRoles = $derived(userroles.get());
+  let authorized = $derived(isAuth && currentUserRoles.includes('creator'));
 
   let title = $state('');
   let description = $state('');
@@ -89,14 +99,7 @@
     { id: 'other', name: 'Etwas anderes' }
   ];
 
-  let isAuth = $derived(isAuthenticated.get());
-  let currentUserRoles = $derived(userroles.get());
-
-  onMount(async () => {
-    if (!isAuth || !currentUserRoles?.includes('creator')) {
-      goto('/');
-    }
-  });
+  onMount(async () => {});
 
   async function handleSubmit() {
     isLoading = true;
@@ -208,236 +211,256 @@
 
 <div class="spacer"></div>
 <div class="container mx-auto max-w-2xl p-4">
-  <h1 class="mb-6 text-center text-3xl font-bold">Neues Catering anlegen</h1>
+  {#if authorized}
+    <h1 class="mb-6 text-center text-3xl font-bold">Neues Catering anlegen</h1>
 
-  {#if successMessage}
-    <div role="alert" class="mb-4 alert alert-success">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24"
-        ><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg
-      >
-      <span>{successMessage}</span>
-    </div>
-  {/if}
-
-  {#if errorMessage}
-    <div role="alert" class="mb-4 alert alert-error">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24"
-        ><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg
-      >
-      <span>{errorMessage}</span>
-    </div>
-  {/if}
-
-  {#if isLoading && uploadProgressMessage}
-    <div role="alert" class="mb-4 alert alert-info">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-6 w-6 shrink-0 stroke-current"
-        ><path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M13 16V9m2 2V9m-2 7H9m0 0H7m2 0H5m-1 4h14a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"
-        ></path></svg
-      >
-      <span>{uploadProgressMessage}</span>
-    </div>
-  {/if}
-
-  <form onsubmit={handleSubmit} class="space-y-4 rounded-lg bg-base-100 p-6 shadow-lg">
-    <!-- Title -->
-    <div>
-      <label for="title" class="label">
-        <span class="label-text">Titel</span>
-      </label>
-      <input type="text" id="title" bind:value={title} class="input-bordered input w-full" required />
-      {#if slug != ''}
-        <div class="px-2.5 text-right text-sm text-accent">{slug}</div>
-      {/if}
-    </div>
-
-    <!-- Number of Persons -->
-    <div>
-      <label for="numberOfPersons" class="label">
-        <span class="label-text">Anzahl der Personen</span>
-      </label>
-      <input type="number" id="numberOfPersons" bind:value={numberOfPersons} min="1" class="input-bordered input w-full" required />
-    </div>
-
-    <!-- Date -->
-    <div>
-      <label for="date" class="label">
-        <span class="label-text">Datum des Events</span>
-      </label>
-      <input type="date" id="date" bind:value={dateString} class="input-bordered input w-full" required />
-    </div>
-
-    <!-- Startzeit -->
-    <div>
-      <label for="start" class="label">
-        <span class="label-text">Startzeit</span>
-      </label>
-      <input type="time" id="start" bind:value={startTime} class="input-bordered input w-full" required />
-    </div>
-
-    <!-- Endzeit -->
-    <div>
-      <label for="end" class="label">
-        <span class="label-text">Endzeit</span>
-      </label>
-      <input type="time" id="end" bind:value={endTime} class="input-bordered input w-full" required />
-    </div>
-
-    <!-- Place -->
-    <div>
-      <label for="place" class="label">
-        <span class="label-text">Ort</span>
-      </label>
-      <input type="text" id="place" bind:value={place} class="input-bordered input w-full" required />
-    </div>
-
-    <!-- Catering Type (Dropdown) -->
-    <div>
-      <label for="cateringType" class="label">
-        <span class="label-text">Catering Typ</span>
-      </label>
-      <select id="cateringType" bind:value={cateringType} class="select-bordered select w-full" required>
-        <option value="" disabled>Wähle einen Typ</option>
-        {#each cateringTypes as type}
-          <option value={type.id}>{type.name}</option>
-        {/each}
-      </select>
-    </div>
-
-    <!-- Catering Style (Dropdown) -->
-    <div>
-      <label for="cateringStyle" class="label">
-        <span class="label-text">Catering Stil</span>
-      </label>
-      <select id="cateringStyle" bind:value={cateringStyle} class="select-bordered select w-full" required>
-        <option value="" disabled>Wähle einen Stil</option>
-        {#each cateringStyles as style}
-          <option value={style.id}>{style.name}</option>
-        {/each}
-      </select>
-    </div>
-
-    <!-- Additional Services (Multi-select) -->
-    <div>
-      <label class="label">
-        <span class="label-text">Zusätzliche Services</span>
-      </label>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-1.5">
-        {#each allAdditionalServices as service}
-          <div class="form-control">
-            <label class="label cursor-pointer justify-start">
-              <input type="checkbox" class="checkbox checkbox-primary" value={service.id} bind:group={additionalServices} />
-              <span class="label-text ml-2">{service.name}</span>
-            </label>
-          </div>
-        {/each}
-      </div>
-    </div>
-
-    <!-- Description (Markdown Editor) -->
-    <div>
-      <label for="description" class="label">
-        <span class="label-text">Beschreibung</span>
-      </label>
-      <MarkdownEditor bind:value={description} mode="tabs" carta={cartaDescription} />
-    </div>
-
-    <!-- Ablauf (Markdown Editor) -->
-    <div>
-      <label for="description" class="label">
-        <span class="label-text">Ablauf</span>
-      </label>
-      <MarkdownEditor bind:value={flow} mode="tabs" carta={cartaFlow} />
-    </div>
-
-    <!-- Client (Markdown Editor) -->
-    <div>
-      <label for="client" class="label">
-        <span class="label-text">Kunde</span>
-      </label>
-      <MarkdownEditor bind:value={client} mode="tabs" carta={cartaClient} />
-    </div>
-
-    <!-- Remarks (Markdown Editor) -->
-    <div>
-      <label for="remarks" class="label">
-        <span class="label-text">Bemerkungen</span>
-      </label>
-      <MarkdownEditor bind:value={remarks} mode="tabs" carta={cartaRemarks} />
-    </div>
-
-    <!-- Special Wishes -->
-    <div>
-      <label for="specialWishes" class="label">
-        <span class="label-text">Besondere Wünsche</span>
-      </label>
-      <textarea id="specialWishes" bind:value={specialWishes} class="textarea-bordered textarea h-24 w-full" placeholder="Gibt es besondere Wünsche?"
-      ></textarea>
-    </div>
-
-    <!-- Offering Created Checkbox -->
-    <div class="form-control">
-      <label class="label cursor-pointer justify-start">
-        <input type="checkbox" class="checkbox checkbox-primary" bind:checked={offeringCreated} />
-        <span class="label-text ml-2">Angebot erstellt</span>
-      </label>
-    </div>
-
-    <!-- File Upload Field -->
-    <div>
-      <label for="fileUpload" class="label">
-        <span class="label-text">Datei hochladen</span>
-      </label>
-      <input
-        type="file"
-        id="fileUpload"
-        class="file-input-bordered file-input w-full"
-        multiple
-        onchange={(e) => {
-          selectedFiles = Array.from((e.target as HTMLInputElement).files || []);
-        }}
-      />
-    </div>
-
-    <!-- Display selected file names -->
-    {#if selectedFiles.length > 0}
-      <div class="mt-2">
-        <span class="label-text">Ausgewählte Dateien:</span>
-        <ul class="list-inside list-disc">
-          {#each selectedFiles as file, index}
-            <li class="flex items-center justify-between text-sm text-gray-700">
-              {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-              <button
-                aria-label="remove file"
-                type="button"
-                class="btn btn-ghost btn-xs"
-                onclick={() => {
-                  selectedFiles.splice(index, 1);
-                  selectedFiles = selectedFiles; // Trigger reactivity
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                  ><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg
-                >
-              </button>
-            </li>
-          {/each}
-        </ul>
+    {#if successMessage}
+      <div role="alert" class="mb-4 alert alert-success">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24"
+          ><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg
+        >
+        <span>{successMessage}</span>
       </div>
     {/if}
 
-    <button type="submit" class="btn w-full btn-secondary" disabled={isLoading}>
-      {#if isLoading}
-        <span class="loading loading-spinner"></span>
-        Sende...
-      {:else}
-        Catering erstellen
+    {#if errorMessage}
+      <div role="alert" class="mb-4 alert alert-error">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+          /></svg
+        >
+        <span>{errorMessage}</span>
+      </div>
+    {/if}
+
+    {#if isLoading && uploadProgressMessage}
+      <div role="alert" class="mb-4 alert alert-info">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-6 w-6 shrink-0 stroke-current"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13 16V9m2 2V9m-2 7H9m0 0H7m2 0H5m-1 4h14a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"
+          ></path></svg
+        >
+        <span>{uploadProgressMessage}</span>
+      </div>
+    {/if}
+
+    <form
+      onsubmit={(e) => {
+        e.preventDefault();
+        handleSubmit();
+      }}
+      class="space-y-4 rounded-lg bg-base-100 p-6 shadow-lg"
+    >
+      <div class="inner-form" class:collapsed={isLoading}>
+        <!-- Title -->
+        <div>
+          <label for="title" class="label">
+            <span class="label-text">Titel</span>
+          </label>
+          <input type="text" id="title" bind:value={title} class="input-bordered input w-full" required />
+          {#if slug != ''}
+            <div class="px-2.5 text-right text-sm text-accent">{slug}</div>
+          {/if}
+        </div>
+
+        <!-- Number of Persons -->
+      <div>
+        <label for="numberOfPersons" class="label">
+          <span class="label-text">Anzahl der Personen</span>
+        </label>
+        <input type="number" id="numberOfPersons" bind:value={numberOfPersons} min="1" class="input-bordered input w-full" required />
+      </div>
+
+      <!-- Date -->
+      <div>
+        <label for="date" class="label">
+          <span class="label-text">Datum des Events</span>
+        </label>
+        <input type="date" id="date" bind:value={dateString} class="input-bordered input w-full" required />
+      </div>
+
+      <!-- Startzeit -->
+      <div>
+        <label for="start" class="label">
+          <span class="label-text">Startzeit</span>
+        </label>
+        <input type="time" id="start" bind:value={startTime} class="input-bordered input w-full" required />
+      </div>
+
+      <!-- Endzeit -->
+      <div>
+        <label for="end" class="label">
+          <span class="label-text">Endzeit</span>
+        </label>
+        <input type="time" id="end" bind:value={endTime} class="input-bordered input w-full" required />
+      </div>
+
+      <!-- Place -->
+      <div>
+        <label for="place" class="label">
+          <span class="label-text">Ort</span>
+        </label>
+        <input type="text" id="place" bind:value={place} class="input-bordered input w-full" required />
+      </div>
+
+      <!-- Catering Type (Dropdown) -->
+      <div>
+        <label for="cateringType" class="label">
+          <span class="label-text">Catering Typ</span>
+        </label>
+        <select id="cateringType" bind:value={cateringType} class="select-bordered select w-full" required>
+          <option value="" disabled>Wähle einen Typ</option>
+          {#each cateringTypes as type}
+            <option value={type.id}>{type.name}</option>
+          {/each}
+        </select>
+      </div>
+
+      <!-- Catering Style (Dropdown) -->
+      <div>
+        <label for="cateringStyle" class="label">
+          <span class="label-text">Catering Stil</span>
+        </label>
+        <select id="cateringStyle" bind:value={cateringStyle} class="select-bordered select w-full" required>
+          <option value="" disabled>Wähle einen Stil</option>
+          {#each cateringStyles as style}
+            <option value={style.id}>{style.name}</option>
+          {/each}
+        </select>
+      </div>
+
+      <!-- Additional Services (Multi-select) -->
+      <div>
+        <label class="label">
+          <span class="label-text">Zusätzliche Services</span>
+        </label>
+        <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2">
+          {#each allAdditionalServices as service}
+            <div class="form-control">
+              <label class="label cursor-pointer justify-start">
+                <input type="checkbox" class="checkbox checkbox-primary" value={service.id} bind:group={additionalServices} />
+                <span class="label-text ml-2">{service.name}</span>
+              </label>
+            </div>
+          {/each}
+        </div>
+      </div>
+
+      <!-- Description (Markdown Editor) -->
+      <div>
+        <label for="description" class="label">
+          <span class="label-text">Beschreibung</span>
+        </label>
+        <MarkdownEditor bind:value={description} mode="tabs" carta={cartaDescription} />
+      </div>
+
+      <!-- Ablauf (Markdown Editor) -->
+      <div>
+        <label for="description" class="label">
+          <span class="label-text">Ablauf</span>
+        </label>
+        <MarkdownEditor bind:value={flow} mode="tabs" carta={cartaFlow} />
+      </div>
+
+      <!-- Client (Markdown Editor) -->
+      <div>
+        <label for="client" class="label">
+          <span class="label-text">Kunde</span>
+        </label>
+        <MarkdownEditor bind:value={client} mode="tabs" carta={cartaClient} />
+      </div>
+
+      <!-- Remarks (Markdown Editor) -->
+      <div>
+        <label for="remarks" class="label">
+          <span class="label-text">Bemerkungen</span>
+        </label>
+        <MarkdownEditor bind:value={remarks} mode="tabs" carta={cartaRemarks} />
+      </div>
+
+      <!-- Special Wishes -->
+      <div>
+        <label for="specialWishes" class="label">
+          <span class="label-text">Besondere Wünsche</span>
+        </label>
+        <textarea id="specialWishes" bind:value={specialWishes} class="textarea-bordered textarea h-24 w-full" placeholder="Gibt es besondere Wünsche?"
+        ></textarea>
+      </div>
+
+      <!-- Offering Created Checkbox -->
+      <div class="form-control">
+        <label class="label cursor-pointer justify-start">
+          <input type="checkbox" class="checkbox checkbox-primary" bind:checked={offeringCreated} />
+          <span class="label-text ml-2">Angebot erstellt</span>
+        </label>
+      </div>
+
+      <!-- File Upload Field -->
+      <div>
+        <label for="fileUpload" class="label">
+          <span class="label-text">Datei hochladen</span>
+        </label>
+        <input
+          type="file"
+          id="fileUpload"
+          class="file-input-bordered file-input w-full"
+          multiple
+          onchange={(e) => {
+            selectedFiles = Array.from((e.target as HTMLInputElement).files || []);
+          }}
+        />
+      </div>
+
+      <!-- Display selected file names -->
+      {#if selectedFiles.length > 0}
+        <div class="mt-2">
+          <span class="label-text">Ausgewählte Dateien:</span>
+          <ul class="list-inside list-disc">
+            {#each selectedFiles as file, index}
+              <li class="flex items-center justify-between text-sm text-gray-700">
+                {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                <button
+                  aria-label="remove file"
+                  type="button"
+                  class="btn btn-ghost btn-xs"
+                  onclick={() => {
+                    selectedFiles.splice(index, 1);
+                    selectedFiles = selectedFiles; // Trigger reactivity
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    ><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg
+                  >
+                </button>
+              </li>
+            {/each}
+          </ul>
+        </div>
       {/if}
-    </button>
-  </form>
+      </div>
+
+      <button type="submit" class="btn w-full btn-secondary" disabled={isLoading}>
+        {#if isLoading}
+          <span class="loading loading-spinner"></span>
+          Sende...
+        {:else}
+          Catering erstellen
+        {/if}
+      </button>
+    </form>
+  {:else}
+    <div class="prose text-center">
+      <h2>Sie sind nicht angemeldet. Um diese Seite anzeigen zu können müssen Sie angenmeldet sein</h2>
+      <button class="btn btn-secondary" onclick={() => login()}>Anmelden</button>
+    </div>
+  {/if}
 </div>
 <div class="spacer"></div>
 
@@ -445,6 +468,15 @@
   @reference '../../app.css';
   label {
     @apply my-2 font-semibold;
+  }
+
+  form {
+    .inner-form {
+      @apply transition-all duration-300;
+      &.collapsed {
+        @apply h-0 overflow-hidden;
+      }
+    }
   }
 
   :global(.carta-editor textarea) {

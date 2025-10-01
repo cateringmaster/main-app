@@ -1,8 +1,8 @@
 <script lang="ts">
-	import '../app.css';
+  import '../app.css';
   import { navigating } from '$app/state';
   import { onMount } from 'svelte';
-	
+
   import Loader from '$lib/components/loader.svelte';
   import HEADER from '$lib/components/header.svelte';
   import FOOTER from '$lib/components/footer.svelte';
@@ -13,7 +13,7 @@
   import webmanifest from '$lib/assets/site.webmanifest';
 
   let { children } = $props();
-	let showInitialLoader = $state(true);
+  let showInitialLoader = $state(true);
 
   onMount(() => {
     setTimeout(() => {
@@ -31,7 +31,13 @@
 </svelte:head>
 
 <div class="wrapper">
-  <HEADER />
-	<main>{@render children?.()}</main>
-  <FOOTER />
-</div>  
+  {#if navigating.to || showInitialLoader}
+    <div class="global-loading">
+      <Loader size={'large'}></Loader>
+    </div>
+  {:else}
+    <HEADER />
+    <main>{@render children?.()}</main>
+    <FOOTER />
+  {/if}
+</div>

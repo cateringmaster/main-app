@@ -1,5 +1,7 @@
 <script lang="ts">
   import markdownit from 'markdown-it';
+  import { userroles } from '$store/sharedStates.svelte';
+  import { goto } from '$app/navigation';
   let { selectedCatering } = $props();
   let modal: HTMLDialogElement;
 
@@ -19,6 +21,16 @@
     selectedCatering?.end ? new Date(selectedCatering.end).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : 'N/A'
   );
   let formattedAdditionalServices = $derived(selectedCatering?.additionalServices?.length ? selectedCatering.additionalServices.join(', ') : 'Keine');
+
+  // Check if user has creator role
+  let isCreator = $derived(userroles.get().includes('creator'));
+
+  function editCatering() {
+    if (selectedCatering?.id) {
+      goto(`/edit-catering?id=${selectedCatering.id}`);
+      closeModal();
+    }
+  }
 </script>
 
 <dialog bind:this={modal} class="modal">
@@ -29,10 +41,17 @@
 
     {#if selectedCatering}
       <div class="flex max-w-none flex-col">
-        <h2 class="text-2xl font-bold">{selectedCatering.title}</h2>
-        {#if selectedCatering.date}
-          <p class="text-accent">{formattedDate}</p>
-        {/if}
+        <div class="flex justify-between">
+          <div class="flex flex-col">
+            <h2 class="text-2xl font-bold">{selectedCatering.title}</h2>
+            {#if selectedCatering.date}
+              <p class="text-accent">{formattedDate}</p>
+            {/if}
+          </div>
+          {#if isCreator}
+            <button class="btn mt-auto btn-sm" onclick={editCatering}> Bearbeiten </button>
+          {/if}
+        </div>
 
         <div class="divider"></div>
 
@@ -49,7 +68,7 @@
           {/if}
           {#if selectedCatering.offeringCreated !== undefined}
             <div class="ml-auto badge badge-lg {selectedCatering.offeringCreated ? 'badge-success' : 'badge-error'} gap-2">
-              Angebot erstellt: {selectedCatering.offeringCreated ? 'Ja' : 'Nein'}
+              Angebot erstellt: <strong>{selectedCatering.offeringCreated ? 'Ja' : 'Nein'}</strong>
             </div>
           {/if}
         </div>
@@ -147,6 +166,5 @@
   .table :where(th, td) {
     vertical-align: top;
     min-width: 175px;
-
   }
 </style>
